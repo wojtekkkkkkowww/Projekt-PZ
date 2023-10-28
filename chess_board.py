@@ -40,8 +40,6 @@ class ChessBoard(tk.Canvas):
 
 
     def draw_board(self,board):
-        
-
         for square in chess.SQUARES:
             rank, file = chess.square_rank(square), chess.square_file(square)
             color = darker_brown if (rank + file) % 2 == 0 else light_cream
@@ -53,15 +51,25 @@ class ChessBoard(tk.Canvas):
             x, y = chess.square_file(square) * 50, (chess.square_rank(square)) * 50
             self.create_image(x + 25, y + 25, image=self.piece_images[piece_symbol])
 
+
+
+
+
     def on_square_click(self, event):
         col, row = event.x // 50, event.y // 50
-        square = chess.square(col,row)  
+        square = chess.square(col, row)  
 
         if self.game is not None:
-            if self.highlighted_square is not None:
-                rank, file = chess.square_rank(self.highlighted_square), chess.square_file(self.highlighted_square)
-                color = darker_brown if (rank + file) % 2 == 0 else light_cream
-                self.highlight_square(self.highlighted_square,color) 
-            self.game.select_square(square)
-            self.highlight_square(square, light_green)
-            self.highlighted_square = square  
+            piece = self.game.board.piece_at(square)
+        
+            if piece is not None and piece.color == self.game.current_color:
+                if self.highlighted_square is not None:
+                    color = darker_brown if (col + row) % 2 == 0 else light_cream
+                    self.highlight_square(self.highlighted_square, color)
+                self.game.select_square(square)
+                self.highlight_square(square, light_green)
+                self.highlighted_square = square
+        
+            elif self.highlighted_square is not None:
+                self.game.make_move(square)
+                self.highlighted_square = None

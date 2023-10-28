@@ -9,7 +9,7 @@ class ChessGame(tk.Frame):
         super().__init__(parent)
         self.parent = parent
         self.with_bot = with_bot
-        self.white_turn = True
+        self.current_color = chess.WHITE
         self.canvas = ChessBoard(self,self)
         self.canvas.pack(fill=tk.BOTH, expand=True)
         self.selected_square = None
@@ -22,7 +22,7 @@ class ChessGame(tk.Frame):
     def select_square(self, square):
         if self.selected_square is None:
             piece = self.board.piece_at(square)
-            if piece is not None and piece.color == (chess.WHITE if self.white_turn else chess.BLACK):
+            if piece is not None and piece.color == self.current_color:
                 self.selected_square = square
                 self.canvas.highlight_square(square, "green")
 
@@ -33,5 +33,5 @@ class ChessGame(tk.Frame):
             if move in self.board.legal_moves:
                 self.board.push(move)
                 self.selected_square = None
-                self.white_turn = not self.white_turn
+                self.current_color = not self.current_color
                 self.canvas.draw_board(self.board)
