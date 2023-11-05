@@ -1,0 +1,2 @@
+https://techvidvan.com/tutorials/hand-gesture-recognition-tensorflow-opencv/
+https://github.com/google/mediapipe/blob/master/docs/solutions/hands.md 

@@ -1,0 +1,4 @@
+opencv-python>=4.5
+numpy>=1.19.3
+tensorflow>=2.5.0 # jeszcze nie potrzebne 
+mediapipe>=0.8.5
