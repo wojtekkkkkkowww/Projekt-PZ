@@ -3,7 +3,7 @@ import tensorflow as tf
 import cv2
 import mediapipe as mp
 
-model = tf.keras.models.load_model('test.model')
+model = tf.keras.models.load_model('test.keras')
 
 probability_model = tf.keras.Sequential([model, 
                                          tf.keras.layers.Softmax()])
@@ -44,6 +44,7 @@ while cap.isOpened():
             predictions = probability_model.predict(matrix)
             print(predictions)
 
+    frame = cv2.flip(frame, 1)
     cv2.imshow('testowanie', frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):

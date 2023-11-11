@@ -22,4 +22,4 @@ model.compile(optimizer='adam',
 
 model.fit(x_train, y_train, epochs=20)
 
-model.save('test.model')
+model.save('test.keras')
