@@ -2,13 +2,14 @@ import numpy as np
 import tensorflow as tf
 
 EPOCH = 20
-a = np.load('1.npy')
-b = np.load('2.npy')
-c = np.load('3.npy')
 
-x_train =  np.concatenate((a , b , c)) # lista macierzy o rozmiarze (21, 3)
-y_train = np.array([0 for _ in a] + [1 for _ in b] + [2 for _ in c]) # liczba który symbol
+test = []
+for i in range(12):
+    test.append(np.load(str(i+1)+".npy"))
 
+
+x_train =  np.concatenate(test) 
+y_train = np.concatenate([np.full(len(sign), i) for i, sign in enumerate(test)])
 
 model = tf.keras.Sequential([
     tf.keras.layers.Flatten(input_shape=(21, 3)),
