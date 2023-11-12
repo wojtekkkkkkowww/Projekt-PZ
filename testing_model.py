@@ -9,7 +9,7 @@ model = tf.keras.models.load_model(f"models/{sys.argv[1]}")
 probability_model = tf.keras.Sequential([model, 
                                          tf.keras.layers.Softmax()])
 
-language = [i + 1 for i in range(12)]
+language = [i + 1 for i in range(13)]
 
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(model_complexity=0,
@@ -49,7 +49,10 @@ while cap.isOpened():
             predicted_sign_index = np.argmax(predictions[0])
             sureness = predictions[0][predicted_sign_index]
             print(predictions)
-            
+            if sureness < 0.99:
+                predicted_sign_index = 12
+                sureness = 0
+
     frame = cv2.flip(frame, 1)
 
     cv2.putText(frame, str(language[predicted_sign_index]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)

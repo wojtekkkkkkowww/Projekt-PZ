@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import os
 
-DATA_DIR = 'data/model1'
+DATA_DIR = 'model1_data'
 EPOCH = 100
 
 test = []
@@ -18,7 +18,7 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dense(64, activation='relu'),
     tf.keras.layers.Dense(32, activation='relu'),
     tf.keras.layers.Dense(16, activation='relu'),
-    tf.keras.layers.Dense(12, activation='softmax')  # Assuming 12 classes
+    tf.keras.layers.Dense(12)  
 ])
 
 model.compile(optimizer='adam',
@@ -27,4 +27,4 @@ model.compile(optimizer='adam',
 
 model.fit(x_train, y_train, epochs=EPOCH)
 
-model.save('models/model1.keras')
+model.save('model1.keras')
