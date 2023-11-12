@@ -1,10 +1,15 @@
+import numpy as np
+import tensorflow as tf
 import cv2
 import mediapipe as mp
-import numpy as np
-import sys
 
-OUTPUT_FILENAME = f'./data/model3/{sys.argv[1]}.npy'
-result = []
+import sys
+model = tf.keras.models.load_model(sys.argv[1])
+
+probability_model = tf.keras.Sequential([model, 
+                                         tf.keras.layers.Softmax()])
+
+language = [i + 1 for i in range(12)]
 
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(model_complexity=0,
@@ -34,21 +39,26 @@ while cap.isOpened():
                 connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style()
             )
 
+    predicted_sign_index = -1
+    sureness = 0
     if results.multi_hand_world_landmarks:
         for hand_landmarks in results.multi_hand_world_landmarks:
 
-            matrix = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark], dtype=float)
-            print(matrix)
-            print(np.shape(matrix))
-            result.append(matrix)
+            matrix = np.array([[[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]], dtype=float)
+            predictions = probability_model.predict(matrix)
+            predicted_sign_index = np.argmax(predictions[0])
+            sureness = predictions[0][predicted_sign_index]
+            print(predictions)
+            
+    frame = cv2.flip(frame, 1)
 
-    cv2.imshow('Paluszki', frame)
+    cv2.putText(frame, str(language[predicted_sign_index]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+    cv2.putText(frame, str(sureness), (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+
+    cv2.imshow('testowanie', frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 cap.release()
 cv2.destroyAllWindows()
-
-np.save(OUTPUT_FILENAME, result);
-

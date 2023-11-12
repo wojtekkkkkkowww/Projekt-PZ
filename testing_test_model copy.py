@@ -42,6 +42,7 @@ while cap.isOpened():
 
             matrix = np.array([[[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]], dtype=float)
             predictions = probability_model.predict(matrix)
+            print('gest nr:', np.argmax(predictions), 'z ', predictions[np.argmax(predictions)], ' prawdopodobieństwem')
             print(predictions)
 
     frame = cv2.flip(frame, 1)
