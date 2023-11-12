@@ -9,6 +9,10 @@ hands = mp_hands.Hands(model_complexity=0,
     min_detection_confidence=0.5,
     min_tracking_confidence=0.5)
 
+mp_drawing = mp.solutions.drawing_utils
+mp_drawing_styles = mp.solutions.drawing_styles
+
+
 DATA_DIR = './data'
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
@@ -17,7 +21,7 @@ number_of_signs = 12
 number_of_frames = 300
 
 cap = cv2.VideoCapture(0)
-for j in range(number_of_signs):
+for j in range(11,number_of_signs):
     if not os.path.exists(os.path.join(DATA_DIR, str(j))):
         os.makedirs(os.path.join(DATA_DIR, str(j)))
 
@@ -39,12 +43,21 @@ for j in range(number_of_signs):
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = hands.process(frame_rgb)
 
-        if results.multi_hand_world_landmarks:
+        if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
+                mp_drawing.draw_landmarks(
+                    frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,
+                    landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
+                    connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style()
+            )
+
+
+        if results.multi_hand_world_landmarks:
+            for hand_landmarks in results.multi_hand_world_landmarks:
                 matrix = np.array([[landmark.x,landmark.y,landmark.z] for landmark in hand_landmarks.landmark],dtype=float)
                 result.append(matrix)
 
-        cv2.imshow('frame', frame)
+        cv2.imshow('frame', cv2.flip(frame, 1))
         cv2.waitKey(25)
         cv2.imwrite(os.path.join(DATA_DIR, str(j), '{}.jpg'.format(c)), frame)
         c += 1
