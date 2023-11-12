@@ -4,7 +4,7 @@ import cv2
 import mediapipe as mp
 
 import sys
-model = tf.keras.models.load_model(sys.argv[1])
+model = tf.keras.models.load_model(f"models/{sys.argv[1]}")
 
 probability_model = tf.keras.Sequential([model, 
                                          tf.keras.layers.Softmax()])

@@ -30,4 +30,4 @@ model.compile(optimizer='adam',
 
 model.fit(x_train, y_train, epochs=EPOCH)
 
-model.save('model3.keras')
+model.save('models/model3.keras')
