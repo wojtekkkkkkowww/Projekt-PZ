@@ -49,7 +49,7 @@ while cap.isOpened():
             predicted_sign_index = np.argmax(predictions[0])
             sureness = predictions[0][predicted_sign_index]
             print(predictions)
-            if sureness < 0.99:
+            if sureness < 0.9:
                 predicted_sign_index = 12
                 sureness = 0
 
