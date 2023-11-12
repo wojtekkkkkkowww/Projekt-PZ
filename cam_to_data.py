@@ -3,7 +3,7 @@ import mediapipe as mp
 import numpy as np
 import sys
 
-OUTPUT_FILENAME = f'./data/model3/{sys.argv[1]}.npy'
+OUTPUT_FILENAME = f'./data/{sys.argv[2]}/{sys.argv[1]}.npy'
 result = []
 
 mp_hands = mp.solutions.hands
