@@ -3,7 +3,7 @@ import tensorflow as tf
 import os
 
 DATA_DIR = 'data/model1/sample1'
-EPOCH = 100
+EPOCH = 200
 
 test = []
 for i in range(12):
@@ -15,12 +15,13 @@ y_train = np.concatenate([np.full(len(sign), i) for i, sign in enumerate(test)])
 
 model = tf.keras.Sequential([
     tf.keras.layers.Flatten(input_shape=(21, 3)),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dropout(0.5),  
     tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dropout(0.5),  
     tf.keras.layers.Dense(32, activation='relu'),
-    tf.keras.layers.Dense(16, activation='relu'),
-    tf.keras.layers.Dense(12)  
+    tf.keras.layers.Dense(12) 
 ])
-
 model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
