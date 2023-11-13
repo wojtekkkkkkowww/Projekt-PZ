@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import mediapipe as mp
+import sys
 
 
 mp_hands = mp.solutions.hands
@@ -54,7 +55,7 @@ for j in range(number_of_signs):
         cv2.waitKey(25)
         c += 1
     
-    np.save(str(j)+".npy",np.array(result))
+    np.save(f"data/{sys.argv[1]}/{str(j)}.npy",np.array(result))
 
 
 cap.release()

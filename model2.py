@@ -4,7 +4,7 @@ import tensorflow as tf
 NUMBER_OF_SYMBOLS = 12
 EPOCH = 50
 
-files = [f'data/model3/{i}.npy' for i in range(0, NUMBER_OF_SYMBOLS)]
+files = [f'data/model2/{i}.npy' for i in range(0, NUMBER_OF_SYMBOLS)]
 data = [np.load(file) for file in files]
 
 x_train =  np.concatenate(data)
