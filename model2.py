@@ -13,9 +13,9 @@ y_train = np.array([label for label in range(0,NUMBER_OF_SYMBOLS) for cords in d
 model = tf.keras.Sequential([
     tf.keras.layers.Flatten(input_shape=(21, 3)),
     tf.keras.layers.Dropout(0.2),
-    tf.keras.layers.Dense(20, activation='relu'),
+    tf.keras.layers.Dense(40, activation='relu'),
     tf.keras.layers.Dropout(0.4),
-    tf.keras.layers.Dense(10, activation='relu'),
+    tf.keras.layers.Dense(20, activation='relu'),
     tf.keras.layers.Dense(NUMBER_OF_SYMBOLS, activation='softmax')
 ])
 
