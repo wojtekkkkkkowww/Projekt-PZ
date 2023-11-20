@@ -6,6 +6,13 @@ import mediapipe as mp
 import sys
 model = tf.keras.models.load_model(f"models/{sys.argv[1]}")
 
+SUPER = False
+if(sys.argv[1] == "supermodel.keras"):
+    SUPER = True
+
+rada_mendrcuw = [tf.keras.models.load_model(f"models/model{i}.keras") for i in range(1,4)]
+rada_mendrcuw = [tf.keras.Sequential([mendrzec,tf.keras.layers.Softmax()]) for mendrzec in rada_mendrcuw]
+
 probability_model = tf.keras.Sequential([model, 
                                          tf.keras.layers.Softmax()])
 
@@ -45,6 +52,11 @@ while cap.isOpened():
         for hand_landmarks in results.multi_hand_world_landmarks:
 
             matrix = np.array([[[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]], dtype=float)
+            
+            if(SUPER):
+                matrix = np.array([np.concatenate([mendrzec.predict(matrix) for mendrzec in rada_mendrcuw])])
+                print(matrix.shape)
+            
             predictions = probability_model.predict(matrix)
             predicted_sign_index = np.argmax(predictions[0])
             sureness = predictions[0][predicted_sign_index]

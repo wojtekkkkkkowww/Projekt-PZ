@@ -21,23 +21,24 @@ p_model3 = tf.keras.Sequential([model3,
                                          tf.keras.layers.Softmax()])
 
 y_train = np.concatenate([np.full(len(sign), i) for i, sign in enumerate(test)])
-x_train = []
-test =  np.concatenate(test)
-print(len(test))
-for i,sign in enumerate(test):
-    print(i)
-    p1 = p_model1.predict(np.array([sign]))
-    p2 = p_model2.predict(np.array([sign]))
-    p3 = p_model3.predict(np.array([sign]))
-    x_train.append(np.concatenate([p1,p2,p3]))    
-x_train = np.array(x_train)
-print(x_train.shape)
+# x_train = []
+# test =  np.concatenate(test)
+# print(len(test))
+# for i,sign in enumerate(test):
+#     print(i)
+#     p1 = p_model1.predict(np.array([sign]))
+#     p2 = p_model2.predict(np.array([sign]))
+#     p3 = p_model3.predict(np.array([sign]))
+#     x_train.append(np.concatenate([p1,p2,p3]))    
+# x_train = np.array(x_train)
+# print(x_train.shape)
 
-np.save(f"data/supermodel/x_train.npy",x_train)
+# np.save(f"data/supermodel/x_train.npy",x_train)
 
+x_train = np.load(f"data/supermodel/x_train.npy")
 
 model = tf.keras.Sequential([
-    tf.keras.layers.Flatten(input_shape=(12, 3)),
+    tf.keras.layers.Flatten(input_shape=(3, 12)),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dense(64, activation='relu'),
     tf.keras.layers.Dense(32, activation='relu'),
