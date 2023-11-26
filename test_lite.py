@@ -2,19 +2,11 @@ import numpy as np
 import tensorflow as tf
 import cv2
 import mediapipe as mp
-import time
+
 import sys
-model = tf.keras.models.load_model(f"models/{sys.argv[1]}")
-
-SUPER = False
-if(sys.argv[1] == "supermodel.keras"):
-    SUPER = True
-
-rada_mendrcuw = [tf.keras.models.load_model(f"models/model{i}.keras") for i in range(1,4)]
-rada_mendrcuw = [tf.keras.Sequential([mendrzec,tf.keras.layers.Softmax()]) for mendrzec in rada_mendrcuw]
-
-probability_model = tf.keras.Sequential([model, 
-                                         tf.keras.layers.Softmax()])
+import time
+interpreter = tf.lite.Interpreter(model_path=sys.argv[1])
+signature = interpreter.get_signature_runner()
 
 language = [i + 1 for i in range(13)]
 
@@ -25,7 +17,6 @@ hands = mp_hands.Hands(model_complexity=0,
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
-
 cap = cv2.VideoCapture(0)
 
 while cap.isOpened():
@@ -52,17 +43,14 @@ while cap.isOpened():
         for hand_landmarks in results.multi_hand_world_landmarks:
 
             startTime = time.time()
-
-            matrix = np.array([[[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]], dtype=float)
-            
-            if(SUPER):
-                matrix = np.array([np.concatenate([mendrzec.predict(matrix) for mendrzec in rada_mendrcuw])])
-                print(matrix.shape)
-            
-            predictions = probability_model.predict(matrix)
-            predicted_sign_index = np.argmax(predictions[0])
+            matrix = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark], dtype=np.float32)
+            predictions = signature(flatten_input=matrix)
+            predictions = predictions[list(predictions.keys())[0]]
+            predictions[0] = np.exp(predictions[0])/sum(np.exp(predictions[0])) #softmax
+            predicted_sign_index = np.argmax(predictions[0]) 
             sureness = predictions[0][predicted_sign_index]
-            print("Time: ",time .time() - startTime)
+
+            print('Time: ', time.time() - startTime)
             #if sureness < 0.9:
             #    predicted_sign_index = 12
             #    sureness = 0
