@@ -20,7 +20,8 @@ print(np.shape(x_train), np .shape(y_train))
 
 model = tf.keras.Sequential([
     tf.keras.layers.Flatten(input_shape=(21, 3)),
-    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(16, activation='relu'),
     tf.keras.layers.Dense(NUMBER_OF_SYMBOLS)
 ])
 

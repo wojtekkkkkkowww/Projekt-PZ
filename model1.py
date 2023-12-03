@@ -29,3 +29,4 @@ model.compile(optimizer='adam',
 model.fit(x_train, y_train, epochs=EPOCH)
 
 model.save('models/model1.keras')
+tf.saved_model.save(model, 'to_lite_data/model1')
