@@ -3,11 +3,9 @@ import tensorflow as tf
 import cv2
 import mediapipe as mp
 
-import sys
-import time
 
 
-
+COUNT = 5
 class SignSeriesRecognition:
     def __init__(self, start_sign, end_sign):
         self.START_SIGN = start_sign
@@ -19,7 +17,10 @@ class SignSeriesRecognition:
         self.sign_series = []
     def add_sign(self, sign):
         if self.is_working:
-            self.sign_series.append(sign)
+            if len(self.sign_series) == 0:
+                self.sign_series.append(sign)
+            if self.sign_series[-1] != sign:
+                self.sign_series.append(sign)
     def get_sign_series(self):
         return [i+1 for i in self.sign_series]
     
@@ -59,8 +60,10 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(0)
 
     predicted_sign_index = -1
-    startTime = time.time()
-    print("Start" ,startTime)
+    
+    currentSignCount = 0
+    lastSign = -1
+
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
@@ -80,49 +83,54 @@ if __name__ == "__main__":
                 )
 
         sureness = 0
-        currentTime = time.time()
-
-        if currentTime - startTime> 1:
-            startTime = currentTime
-            if results.multi_hand_world_landmarks:
-                for hand_landmarks in results.multi_hand_world_landmarks:
-                    matrix = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark], dtype=np.float32)
+        
+        if results.multi_hand_world_landmarks:
+            for hand_landmarks in results.multi_hand_world_landmarks:
+                matrix = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark], dtype=np.float32)
          
-                    p1 = s1(flatten_input=matrix)
-                    p1 = p1[list(p1.keys())[0]]
-                    p1[0] = np.exp(p1[0])/sum(np.exp(p1[0])) #softmax
+                p1 = s1(flatten_input=matrix)
+                p1 = p1[list(p1.keys())[0]]
+                p1[0] = np.exp(p1[0])/sum(np.exp(p1[0])) #softmax
          
             
-                    p2 = s2(flatten_input=matrix)
-                    p2 = p2[list(p2.keys())[0]]
-                    p2[0] = np.exp(p2[0])/sum(np.exp(p2[0])) #softmax
+                p2 = s2(flatten_input=matrix)
+                p2 = p2[list(p2.keys())[0]]
+                p2[0] = np.exp(p2[0])/sum(np.exp(p2[0])) #softmax
          
          
-                    p3 = s3(flatten_input=matrix)
-                    p3 = p3[list(p3.keys())[0]]
-                    p3[0] = np.exp(p3[0])/sum(np.exp(p3[0])) #softmax
+                p3 = s3(flatten_input=matrix)
+                p3 = p3[list(p3.keys())[0]]
+                p3[0] = np.exp(p3[0])/sum(np.exp(p3[0])) #softmax
 
-                    x = np.array([p1[0], p2[0], p3[0]], dtype=np.float32)
+                x = np.array([p1[0], p2[0], p3[0]], dtype=np.float32)
 
-                    superP = superSignature(flatten_input=x)
-                    superP = superP[list(superP.keys())[0]]
-                    superP[0] = np.exp(superP[0])/sum(np.exp(superP[0])) #softmax
+                superP = superSignature(flatten_input=x)
+                superP = superP[list(superP.keys())[0]]
+                superP[0] = np.exp(superP[0])/sum(np.exp(superP[0])) #softmax
 
-                    predicted_sign_index = np.argmax(superP[0]) 
-                    if recognizer.is_working:
-                        if predicted_sign_index == recognizer.END_SIGN:
-                            print("ROZPOZNANO GEST KONCA")
-                            print(recognizer.get_sign_series())
-                            recognizer.end()
-                        else: 
-                            if predicted_sign_index != recognizer.START_SIGN:
-                                recognizer.add_sign(predicted_sign_index)
+                predicted_sign_index = np.argmax(superP[0]) 
+                sureness = superP[0][predicted_sign_index]
+                    
+                if lastSign != predicted_sign_index:
+                    lastSign = predicted_sign_index
+                    currentSignCount = 0
+                else:
+                    currentSignCount += 1
+
+                if recognizer.is_working and sureness > 0.9:
+                    if predicted_sign_index == recognizer.END_SIGN:
+                        print("ROZPOZNANO GEST KONCA")
+                        print(recognizer.get_sign_series())
+                        recognizer.end()
+                    else: 
+                        if predicted_sign_index != recognizer.START_SIGN and currentSignCount == COUNT:
+                            recognizer.add_sign(predicted_sign_index)
                         
-                    if predicted_sign_index == recognizer.START_SIGN and not recognizer.is_working:
-                        print("ROZPOZNANO GEST STARTU")
-                        recognizer.begin()  
-            else :
-                predicted_sign_index = -1
+                if predicted_sign_index == recognizer.START_SIGN and not recognizer.is_working and sureness > 0.9:
+                    print("ROZPOZNANO GEST STARTU")
+                    recognizer.begin()  
+        else :
+            predicted_sign_index = -1
 
         frame = cv2.flip(frame, 1)
 
