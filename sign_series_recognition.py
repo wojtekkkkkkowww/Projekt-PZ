@@ -5,7 +5,7 @@ import mediapipe as mp
 
 
 
-COUNT = 5
+COUNT = 7
 class SignSeriesRecognition:
     def __init__(self, start_sign, end_sign):
         self.START_SIGN = start_sign
@@ -108,7 +108,7 @@ if __name__ == "__main__":
                 superP = superP[list(superP.keys())[0]]
                 superP[0] = np.exp(superP[0])/sum(np.exp(superP[0])) #softmax
 
-                predicted_sign_index = np.argmax(superP[0]) 
+                index = np.argmax(superP[0]) 
                 sureness = superP[0][predicted_sign_index]
                     
                 if lastSign != predicted_sign_index:
@@ -117,13 +117,18 @@ if __name__ == "__main__":
                 else:
                     currentSignCount += 1
 
+                if currentSignCount == COUNT:
+                    currentSignCount = 0
+                    predicted_sign_index  = index
+
+
                 if recognizer.is_working and sureness > 0.9:
                     if predicted_sign_index == recognizer.END_SIGN:
                         print("ROZPOZNANO GEST KONCA")
                         print(recognizer.get_sign_series())
                         recognizer.end()
                     else: 
-                        if predicted_sign_index != recognizer.START_SIGN and currentSignCount == COUNT:
+                        if predicted_sign_index != recognizer.START_SIGN :
                             recognizer.add_sign(predicted_sign_index)
                         
                 if predicted_sign_index == recognizer.START_SIGN and not recognizer.is_working and sureness > 0.9:
