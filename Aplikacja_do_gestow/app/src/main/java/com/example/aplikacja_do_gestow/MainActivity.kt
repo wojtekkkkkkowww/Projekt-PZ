@@ -14,47 +14,47 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.core.Preview
 import androidx.camera.core.CameraSelector
 import android.util.Log
+import androidx.camera.core.AspectRatio
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageProxy
 import com.example.aplikacja_do_gestow.databinding.ActivityMainBinding
-import java.nio.ByteBuffer
 
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var viewBinding: ActivityMainBinding
+class MainActivity : AppCompatActivity() ,HandLandmarkerProcessor.LandmarkerListener {
+    lateinit var viewBinding: ActivityMainBinding
 
     private var imageCapture: ImageCapture? = null
 
     private lateinit var cameraExecutor: ExecutorService
 
-    private lateinit var handLandmarkerProcessor: HandLandmarkerProcessor
+    lateinit var handLandmarkerProcessor: HandLandmarkerProcessor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
-
         if (allPermissionsGranted()) {
             startCamera()
         } else {
             requestPermissions()
         }
 
-        handLandmarkerProcessor = HandLandmarkerProcessor(this)
+        handLandmarkerProcessor = HandLandmarkerProcessor(this,this)
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
             // Preview
             val preview = Preview.Builder()
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                .setTargetRotation(viewBinding.viewFinder.display.rotation)
                 .build()
                 .also {
                     it.setSurfaceProvider(viewBinding.viewFinder.surfaceProvider)
@@ -64,14 +64,18 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
             val imageAnalyzer = ImageAnalysis.Builder()
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                .setTargetRotation(viewBinding.viewFinder.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, HandLandmarkAnalyzer(handLandmarkerProcessor))
+                    it.setAnalyzer(cameraExecutor){
+                        image->detectHand(image)
+                    }
                 }
 
-            // Select back camera as a default
+            // Select front camera as a default
             val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
             try {
@@ -140,14 +144,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    private class HandLandmarkAnalyzer(private val processor: HandLandmarkerProcessor) : ImageAnalysis.Analyzer {
-        override fun analyze(image: ImageProxy) {
-            val landmarks = processor.processImage(image)
-            landmarks.forEachIndexed { index, result ->
-                Log.d(TAG, "Landmarks for hand #$index: ${result.landmarks()}")
-            }
-            image.close()
-        }
+    private fun detectHand(imageProxy: ImageProxy){
+        handLandmarkerProcessor.processImage(imageProxy)
+    }
+
+    override fun onError(error: String, errorCode: Int) {
+        TODO("Not yet implemented")
+
+    }
+
+    override fun onResult(resultBundle: HandLandmarkerProcessor.ResultBundle) {
+           viewBinding.overly.setResults(
+            resultBundle.result.first(),
+            resultBundle.inputImageHeight,
+            resultBundle.inputImageWidth,
+           )
     }
 
 }
