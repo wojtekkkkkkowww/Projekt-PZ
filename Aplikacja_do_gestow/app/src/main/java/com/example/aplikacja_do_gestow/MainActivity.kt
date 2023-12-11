@@ -19,11 +19,15 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageProxy
 import com.example.aplikacja_do_gestow.databinding.ActivityMainBinding
+import com.example.aplikacja_do_gestow.ml.Model1
+import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
+import org.tensorflow.lite.DataType
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import java.nio.ByteBuffer
 
 
 class MainActivity : AppCompatActivity() ,HandLandmarkerProcessor.LandmarkerListener {
     lateinit var viewBinding: ActivityMainBinding
-
     private var imageCapture: ImageCapture? = null
 
     private lateinit var cameraExecutor: ExecutorService
@@ -42,6 +46,7 @@ class MainActivity : AppCompatActivity() ,HandLandmarkerProcessor.LandmarkerList
 
         handLandmarkerProcessor = HandLandmarkerProcessor(this,this)
         cameraExecutor = Executors.newSingleThreadExecutor()
+
     }
 
 
@@ -144,6 +149,30 @@ class MainActivity : AppCompatActivity() ,HandLandmarkerProcessor.LandmarkerList
             }
         }
 
+
+    private fun landmarkToByteBuffer(handLandmarkerResult: HandLandmarkerResult): ByteBuffer {
+        val byteBuffer = ByteBuffer.allocateDirect(4*21*3)
+
+        for (landmark in handLandmarkerResult.landmarks()) {
+            for (normalizedLandmark in landmark) {
+                byteBuffer.putFloat(normalizedLandmark.x())
+                byteBuffer.putFloat(normalizedLandmark.y())
+                byteBuffer.putFloat(normalizedLandmark.z())
+
+            }
+        }
+        return byteBuffer
+    }
+
+
+    fun softmax(inputArray: FloatArray): FloatArray {
+        val max = inputArray.maxOrNull() ?: 0f
+        val expArray = inputArray.map { kotlin.math.exp(it - max) }.toFloatArray()
+        val sumExp = expArray.sum()
+        return expArray.map { it / sumExp }.toFloatArray()
+    }
+
+
     private fun detectHand(imageProxy: ImageProxy){
         handLandmarkerProcessor.processImage(imageProxy)
     }
@@ -153,12 +182,30 @@ class MainActivity : AppCompatActivity() ,HandLandmarkerProcessor.LandmarkerList
 
     }
 
+
     override fun onResult(resultBundle: HandLandmarkerProcessor.ResultBundle) {
            viewBinding.overly.setResults(
             resultBundle.result.first(),
             resultBundle.inputImageHeight,
             resultBundle.inputImageWidth,
            )
+            if (resultBundle.result.first().landmarks().isNotEmpty()) {
+
+                //Test Model1
+                val byteBuffer = landmarkToByteBuffer(resultBundle.result.first())
+                val inputFeature0 =
+                    TensorBuffer.createFixedSize(intArrayOf(1, 21, 3), DataType.FLOAT32)
+                inputFeature0.loadBuffer(byteBuffer)
+                val model1 = Model1.newInstance(this)
+                val outputs = model1.process(inputFeature0)
+                val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+                val resultArray = softmax(outputFeature0.floatArray)
+                val maxValue = resultArray.maxOrNull()
+                val prediction = resultArray.indexOfFirst { it == maxValue }
+
+                Log.d(TAG, "WYNIK: $prediction ")
+                Log.d(TAG, "LANDMARK ${resultBundle.result.first()} ")
+            }
     }
 
 }
