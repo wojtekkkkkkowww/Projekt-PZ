@@ -57,7 +57,9 @@ while cap.isOpened():
          
             p1 = s1(flatten_input=matrix)
             p1 = p1[list(p1.keys())[0]]
+            print(p1[0])
             p1[0] = np.exp(p1[0])/sum(np.exp(p1[0])) #softmax
+            print("SOFT",p1[0])
          
             
             p2 = s2(flatten_input=matrix)
@@ -78,7 +80,6 @@ while cap.isOpened():
             predicted_sign_index = np.argmax(superP[0]) 
             sureness = superP[0][predicted_sign_index]
 
-            print('Time: ', time.time() - startTime)
             #if sureness < 0.9:
             #    predicted_sign_index = 12
             #    sureness = 0
