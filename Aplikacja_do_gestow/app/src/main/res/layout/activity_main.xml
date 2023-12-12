@@ -11,11 +11,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:scaleType="fillStart"
-        />
+        >
+
+    </androidx.camera.view.PreviewView>
     <com.example.aplikacja_do_gestow.OverlayView
         android:id = "@+id/overly"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:textColor="@color/green"
+        android:text= ""
+        android:textSize="100dp"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
