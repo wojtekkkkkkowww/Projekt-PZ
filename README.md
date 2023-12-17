@@ -53,3 +53,8 @@ Niestety wszystko w `./super_model.py` jest statycznie. Więc trzeba tam pozmien
 Mając super model mamy wszystko. 
 
 Włączamy więc `./tests/sign_series_recognition.py` i "powinno działać". Tylko musimy upewnić się, że ścieżki działają itp. bo tutaj również wszyst ko jest statycznie.
+Po pokazaniu gestu startu (domyślnie jest kciuk w górę), pokazujemy serie gestów, którą kończymy gestem nr 5 (mogę się mylić). Program zwraca nam listę gestów w kolejności, którą można wykorzystac jak się chce np. do grania w szachy.
+
+Jest też wersja mobilna, mająca dokładnie te same funkcjonalności co domyśla sieć, znajduje się ona w folderze `./Aplikacja_do_gestow`.
+
+Aplikacja może ma też jeden analogowy gest, tj. zwracający wartość z przedziału (0, 1)(również mogę się mylić) - można go przetestować w `./tests/test_analog.py`.
