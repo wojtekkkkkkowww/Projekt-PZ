@@ -10,6 +10,7 @@ Aktualnie został wytrenowany na poniższych gestach:
 
 ## Instalacja
 
+Biblioteka do nakładania handmarków na dłoń nazywa się Mediapipe.
 Wymagane pakiety są w pliku `requirements.txt`. 
 
 
