@@ -11,8 +11,8 @@ for i in range(12):
 
 
 i1 = tf.lite.Interpreter(model_path='./lite/model1.tflite')
-i2 = tf.lite.Interpreter(model_path='./lite/model1.tflite')
-i3 = tf.lite.Interpreter(model_path='./lite/model1.tflite')
+i2 = tf.lite.Interpreter(model_path='./lite/model2.tflite')
+i3 = tf.lite.Interpreter(model_path='./lite/model3.tflite')
 
 s1 = i1.get_signature_runner()
 s2 = i2.get_signature_runner()
