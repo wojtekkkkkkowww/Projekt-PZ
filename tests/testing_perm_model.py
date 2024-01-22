@@ -54,14 +54,14 @@ while cap.isOpened():
 
             input = [[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]
             input = np.array(input)
-            input = input.flatten()
-            input = input[key]
-            input.reshape(21,3)
-            matrix = np.array([input], dtype=float)
-            matrix = np.array([[[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]], dtype=float)
+           
+            input = input.flatten() 
+            input = input[key] # nakladanie permutacji
+            input = np.array([input])
+           
             
             
-            predictions = probability_model.predict(matrix)
+            predictions = probability_model.predict(input)
             predicted_sign_index = np.argmax(predictions[0])
             sureness = predictions[0][predicted_sign_index]
             print("Time: ",time .time() - startTime)

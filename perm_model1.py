@@ -16,14 +16,19 @@ for i in range(12):
 
 x_train =  np.concatenate(test) 
 y_train = np.concatenate([np.full(len(sign), i) for i, sign in enumerate(test)])
+
+perm_x_train = []
 for x in x_train:
+    print(x.shape)
     x = x.flatten()
     x = x[key]
-    x = x.reshape(21, 3)
- 
+    perm_x_train.append(x)
+   
+perm_x_train = np.array(perm_x_train)
+
 
 model = tf.keras.Sequential([
-    tf.keras.layers.Flatten(input_shape=(21, 3)),
+    tf.keras.layers.Flatten(input_shape=(21*3,)),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dropout(0.5),  
     tf.keras.layers.Dense(64, activation='relu'),
@@ -35,6 +40,6 @@ model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
-model.fit(x_train, y_train, epochs=EPOCH)
+model.fit(perm_x_train, y_train, epochs=EPOCH)
 
 model.save('models/perm_model1.keras')
