@@ -62,5 +62,5 @@ Aplikacja może ma też jeden analogowy gest, tj. zwracający wartość z przedz
 
 
 <p align="center">
-  <img src="./diagram1.svg"/>
+  <img src="./dx.svg"/>
 </p>
