@@ -61,3 +61,6 @@ Jest też wersja mobilna, mająca dokładnie te same funkcjonalności co domyśl
 Aplikacja może ma też jeden analogowy gest, tj. zwracający wartość z przedziału (0, 1)(również mogę się mylić) - można go przetestować w `./tests/test_analog.py`.
 
 
+<p align="center">
+  <img src="./diagram1.svg"/>
+</p>
