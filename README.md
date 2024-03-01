@@ -1,4 +1,4 @@
-# Rozpoznawcz gestuf
+# Rozpoznawacz gestów
 
 Program rozpoznający gesty.
 
