@@ -77,7 +77,7 @@ while cap.isOpened():
                 res = []
                 for m in range(3):
                     if(args.permuted):
-                        key = np.load(f'keys/model{m}_key.npy')
+                        key = np.load(f'keys/model{m+1}_key.npy')
                         matrix = np.array(matrix.flatten()[key]).reshape(21,3)
 
                     if(args.lite):
@@ -93,7 +93,8 @@ while cap.isOpened():
                 matrix = np.array(matrix.flatten()[key]).reshape(21,3)
             
             if(MODEL_LITE):
-                predictions = signature(flatten_input=np.array([matrix], dtype=np.float32))
+                input_details = interpreter.get_input_details().keys()
+                predictions = signature(np.array([matrix], dtype=np.float32))
                 predictions = predictions[list(predictions.keys())[0]]
             else:
                 predictions = model.predict(np.array([matrix]))

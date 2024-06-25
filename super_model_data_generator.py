@@ -26,31 +26,27 @@ if __name__ == "__main__":
 
     for i in range(signs_num):
         print(f"ZNAK : {i}")
-        data = []
-        for m in range(1,4):
-            d = np.load(os.path.join(f'data/model{m}/{args.data}', f'{i}.npy'))
-            if(args.permuted):
-                key = np.load(f'keys/model{m}_key.npy')
-                d_perm = np.array([np.array(x.flatten()[key]).reshape(21,3) for x in d])
-                d = d_perm
-            data.append(d)
-
-        data = np.concatenate(data)
+        data = np.concatenate([np.load(os.path.join(f'data/model{m}/{args.data}', f'{i}.npy')) for m in range(1,4)])
 
         x_train = []
-        for sign in data:
+        for i,sign in enumerate(data):
+            print(i,len(data))
             res = []
-            for i in range(3):
+            for m in range(3):
+                if(args.permuted):
+                    key = np.load(f'keys/model{m+1}_key.npy')
+                    sign = np.array(sign.flatten()[key]).reshape(21,3)
+
                 if(args.lite):
-                    p = signatures[i](flatten_input=np.array([sign], dtype=np.float32))
+                    p = signatures[m](flatten_input=np.array([sign], dtype=np.float32))
                     p = p[list(p.keys())[0]]
+                    print(p)
                 else:
-                    p = models[i].predict(np.array([sign]),verbose=0)
+                    p = models[m].predict(np.array([sign]),verbose=0)
                     
                 res.append(p)
-
-        x_train = np.array(res)
-        np.save(f"data/supermodel/{args.data}/{i}.npy",x_train)    
+            x_train.append(res)
+        np.save(f"data/supermodel/{args.data}/{i}.npy",np.array(x_train))    
 
 
     
