@@ -66,8 +66,10 @@ def save_model(model_string, epoch, x_train, y_train, permuted):
 
     model = get_model(model_string)
     model.add(tf.keras.layers.Dense(NUMBER_OF_SYMBOLS))
+    model.add(tf.keras.layers.Softmax())
+
     model.compile(optimizer='adam',
-             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+             loss=tf.keras.losses.SparseCategoricalCrossentropy(),
              metrics=['accuracy'])
 
     model.fit(x_train, y_train, epochs=int(epoch))

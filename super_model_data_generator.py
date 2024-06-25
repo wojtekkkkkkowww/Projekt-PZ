@@ -25,27 +25,24 @@ if __name__ == "__main__":
     signs_num = len(os.listdir(f'{os.getcwd()}/{path}'))
 
     for i in range(signs_num):
+        print(f"ZNAK : {i}")
         data = []
         for m in range(1,4):
             data.append(np.load(os.path.join(f'data/model{m}/{args.data}', f'{i}.npy')))
         data = np.concatenate(data)
+        data = np.array(data)
 
         x_train = []
         for sign in data:
-            sign = sign.reshape(1,21,3)
             res = []
             for i in range(3):
                 if(args.lite):
                     p = signatures[i](flatten_input=np.array([sign], dtype=np.float32))
                     p = p[list(p.keys())[0]]
-                    res.append(np.exp(p[0])/sum(np.exp(p[0])))
                 else:
-                    p = models[i].predict(sign)
-                    predicted_sign_index = np.argmax(p[0])
-                    sureness = p[0][predicted_sign_index]
-                    print(sign)
-                    print(predicted_sign_index,sureness)
-                    res.append(p)
+                    p = models[i].predict(np.array([sign]),verbose=0)
+                    
+                res.append(p)
 
         x_train = np.array(np.array(res))
         np.save(f"data/supermodel/{args.data}/{i}.npy",x_train)    

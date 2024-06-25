@@ -11,10 +11,6 @@ if(sys.argv[1] == "supermodel.keras"):
     SUPER = True
 
 rada_mendrcuw = [tf.keras.models.load_model(f"models/model{i}.keras") for i in range(1,4)]
-rada_mendrcuw = [tf.keras.Sequential([mendrzec,tf.keras.layers.Softmax()]) for mendrzec in rada_mendrcuw]
-
-probability_model = tf.keras.Sequential([model, 
-                                         tf.keras.layers.Softmax()])
 
 language = [i + 1 for i in range(13)]
 
@@ -59,7 +55,7 @@ while cap.isOpened():
                 matrix = np.array([np.concatenate([mendrzec.predict(matrix) for mendrzec in rada_mendrcuw])])
                 print(matrix.shape)
             
-            predictions = probability_model.predict(matrix)
+            predictions = model.predict(matrix)
             predicted_sign_index = np.argmax(predictions[0])
             sureness = predictions[0][predicted_sign_index]
             print("Time: ",time .time() - startTime)
