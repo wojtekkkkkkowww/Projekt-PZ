@@ -3,14 +3,36 @@ import tensorflow as tf
 import cv2
 import mediapipe as mp
 import time
-import sys
-model = tf.keras.models.load_model(f"models/{sys.argv[1]}")
+import argparse
+
+parser = argparse.ArgumentParser(prog='Video test for models')
+parser.add_argument('-p', '--permuted', action='store_true')
+parser.add_argument('-l', '--lite', action='store_true')
+parser.add_argument('-m', '--model')
+
+args = parser.parse_args()
+
+if(args.model is None):
+    print('see -h')
+    exit()
+
+MODEL_LITE = False
+if(args.model.endswith('tflite')):
+    interpreter = tf.lite.Interpreter(model_path=f'models/{args.model}')
+    signature = interpreter.get_signature_runner()
+    MODEL_LITE = True
+else:
+    model = tf.keras.saving.load_model(f"models/{args.model}")
 
 SUPER = False
-if(sys.argv[1] == "supermodel.keras"):
+if(args.model.startswith('supermodel')):
+    if(args.lite):
+        interpreters = [tf.lite.Interpreter(model_path=f'models/model{i}.tflite') for i in range(1,4)]
+        signatures = [i.get_signature_runner() for i in interpreters]
+    else:
+        models = [tf.keras.saving.load_model(f"models/model{i}.keras") for i in range(1,4)]
     SUPER = True
 
-rada_mendrcuw = [tf.keras.models.load_model(f"models/model{i}.keras") for i in range(1,4)]
 
 language = [i + 1 for i in range(13)]
 
@@ -50,12 +72,33 @@ while cap.isOpened():
             startTime = time.time()
 
             matrix = np.array([[[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]], dtype=float)
-            
+
             if(SUPER):
-                matrix = np.array([np.concatenate([mendrzec.predict(matrix) for mendrzec in rada_mendrcuw])])
-                print(matrix.shape)
+                res = []
+                for m in range(3):
+                    if(args.permuted):
+                        key = np.load(f'keys/model{m}_key.npy')
+                        matrix = np.array(matrix.flatten()[key]).reshape(21,3)
+
+                    if(args.lite):
+                        p = signatures[m](flatten_input=np.array([matrix], dtype=np.float32))
+                        p = p[list(p.keys())[0]]
+                    else:
+                        p = models[m].predict(matrix)
+
+                    res.append(p)
+                matrix = np.array(res)
+            elif(args.permuted):
+                key = np.load(f'keys/{args.model.split(".")[0]}_key.npy')
+                matrix = np.array(matrix.flatten()[key]).reshape(21,3)
             
-            predictions = model.predict(matrix)
+            if(MODEL_LITE):
+                predictions = signature(flatten_input=np.array([matrix]), dtype=np.float32)
+                predictions = predictions[list(p.keys())[0]]
+            else:
+                predictions = model.predict(np.array([matrix]))
+
+
             predicted_sign_index = np.argmax(predictions[0])
             sureness = predictions[0][predicted_sign_index]
             print("Time: ",time .time() - startTime)

@@ -5,8 +5,8 @@ import argparse
 
 parser = argparse.ArgumentParser(prog='Data generator for super model')
 parser.add_argument('-l', '--lite', action='store_true')
+parser.add_argument('-p', '--permuted', action='store_true')
 parser.add_argument('-d', '--data')
-parser.add_argument('-p', '--permuted')
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -28,9 +28,14 @@ if __name__ == "__main__":
         print(f"ZNAK : {i}")
         data = []
         for m in range(1,4):
-            data.append(np.load(os.path.join(f'data/model{m}/{args.data}', f'{i}.npy')))
+            d = np.load(os.path.join(f'data/model{m}/{args.data}', f'{i}.npy'))
+            if(args.permuted):
+                key = np.load(f'keys/model{m}_key.npy')
+                d_perm = np.array([np.array(x.flatten()[key]).reshape(21,3) for x in d])
+                d = d_perm
+            data.append(d)
+
         data = np.concatenate(data)
-        data = np.array(data)
 
         x_train = []
         for sign in data:
@@ -44,7 +49,7 @@ if __name__ == "__main__":
                     
                 res.append(p)
 
-        x_train = np.array(np.array(res))
+        x_train = np.array(res)
         np.save(f"data/supermodel/{args.data}/{i}.npy",x_train)    
 
 
