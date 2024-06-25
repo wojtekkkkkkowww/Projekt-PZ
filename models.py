@@ -45,7 +45,7 @@ def get_train_dataset(data_dir):
     train = [np.load(os.path.join(data_dir, f'{i}.npy')) for i in range(NUMBER_OF_SYMBOLS)]
     x_train =  np.concatenate(train) 
     y_train = np.concatenate([np.full(len(sign), i) for i, sign in enumerate(train)])
-
+    
     return x_train,y_train
 
 def get_model(model):
