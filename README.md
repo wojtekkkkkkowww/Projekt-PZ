@@ -5,7 +5,7 @@ Program rozpoznający gesty.
 Aktualnie został wytrenowany na poniższych gestach:
 
 <p align="center">
-  <img src="./alfabet.png"/>
+  <img src="./diagrams/alfabet.png"/>
 </p>
 
 ## Instalacja
@@ -62,5 +62,5 @@ Aplikacja może ma też jeden analogowy gest, tj. zwracający wartość z przedz
 
 
 <p align="center">
-  <img src="./dx.svg"/>
+  <img src="./diagrams/dx.svg"/>
 </p>
