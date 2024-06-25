@@ -93,8 +93,8 @@ while cap.isOpened():
                 matrix = np.array(matrix.flatten()[key]).reshape(21,3)
             
             if(MODEL_LITE):
-                predictions = signature(flatten_input=np.array([matrix]), dtype=np.float32)
-                predictions = predictions[list(p.keys())[0]]
+                predictions = signature(flatten_input=np.array([matrix], dtype=np.float32))
+                predictions = predictions[list(predictions.keys())[0]]
             else:
                 predictions = model.predict(np.array([matrix]))
 

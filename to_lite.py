@@ -3,7 +3,7 @@ import sys
 
 # https://www.tensorflow.org/lite/guide/ops_select
 
-PATH = f'models/{sys.argv[1]}.keras'
+PATH = f'to_lite_data/{sys.argv[1]}'
 
 converter = tf.lite.TFLiteConverter.from_saved_model(PATH)
 converter.target_spec.supported_ops = [
@@ -13,4 +13,4 @@ converter.target_spec.supported_ops = [
 
 tflite_model = converter.convert()
 
-open(PATH + ".tflite", "wb").write(tflite_model)
+open(f'models/{sys.argv[1]}.tflite', "wb").write(tflite_model)
