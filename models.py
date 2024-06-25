@@ -60,8 +60,9 @@ def save_model(model_string, epoch, x_train, y_train, permuted):
     if(permuted):
         key = np.arange(21*3)
         np.random.shuffle(key)
-        np.save(f'keys/{model_string}.npy', key)
-        x_train = [x.flatten()[key] for x in x_train]
+        np.save(f'keys/{model_string}_key.npy', key)
+        x_perm = np.array([np.array(x.flatten()[key]).reshape(21,3) for x in x_train])
+        x_train = x_perm
 
     model = get_model(model_string)
     model.add(tf.keras.layers.Dense(NUMBER_OF_SYMBOLS))
