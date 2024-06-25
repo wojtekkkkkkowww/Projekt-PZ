@@ -29,8 +29,7 @@ if __name__ == "__main__":
         data = np.concatenate([np.load(os.path.join(f'data/model{m}/{args.data}', f'{i}.npy')) for m in range(1,4)])
 
         x_train = []
-        for i,sign in enumerate(data):
-            print(i,len(data))
+        for sign in data:
             res = []
             for m in range(3):
                 if(args.permuted):
@@ -45,7 +44,7 @@ if __name__ == "__main__":
                     p = models[m].predict(np.array([sign]),verbose=0)
                     
                 res.append(p)
-            x_train.append(res)
+            x_train.append(np.concatenate(res))
         np.save(f"data/supermodel/{args.data}/{i}.npy",np.array(x_train))    
 
 

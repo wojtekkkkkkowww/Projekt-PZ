@@ -88,7 +88,7 @@ while cap.isOpened():
                         p = models[m].predict(matrix)
 
                     res.append(p)
-                matrix = np.array(res)
+                matrix = np.array(np.concatenate(res))
             elif(args.permuted):
                 key = np.load(f'keys/{args.model.split(".")[0]}_key.npy')
                 matrix = np.array(matrix.flatten()[key]).reshape(21,3)
