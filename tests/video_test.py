@@ -81,7 +81,8 @@ while cap.isOpened():
                         matrix = np.array(matrix.flatten()[key]).reshape(21,3)
 
                     if(args.lite):
-                        p = signatures[m](flatten_input=np.array([matrix], dtype=np.float32))
+                        atr = list(signatures[m].get_input_details().keys())[0]
+                        p = signatures[m](**{atr:np.array([matrix], dtype=np.float32)})
                         p = p[list(p.keys())[0]]
                     else:
                         p = models[m].predict(matrix)
@@ -93,8 +94,8 @@ while cap.isOpened():
                 matrix = np.array(matrix.flatten()[key]).reshape(21,3)
             
             if(MODEL_LITE):
-                input_details = interpreter.get_input_details().keys()
-                predictions = signature(np.array([matrix], dtype=np.float32))
+                atr = list(signature.get_input_details().keys())[0]
+                predictions = signature(**{atr:np.array([matrix], dtype=np.float32)})
                 predictions = predictions[list(predictions.keys())[0]]
             else:
                 predictions = model.predict(np.array([matrix]))

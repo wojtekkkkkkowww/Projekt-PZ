@@ -38,9 +38,9 @@ if __name__ == "__main__":
                     sign = np.array(sign.flatten()[key]).reshape(21,3)
 
                 if(args.lite):
-                    p = signatures[m](flatten_input=np.array([sign], dtype=np.float32))
+                    atr = list(signatures[m].get_input_details().keys())[0]
+                    p = signatures[m](**{atr:np.array([sign], dtype=np.float32)})
                     p = p[list(p.keys())[0]]
-                    print(p)
                 else:
                     p = models[m].predict(np.array([sign]),verbose=0)
                     
