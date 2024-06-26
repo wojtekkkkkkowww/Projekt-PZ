@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import cv2
 import mediapipe as mp
-
+import argparse
 
 
 COUNT = 7
@@ -34,19 +34,33 @@ class SignSeriesRecognition:
 if __name__ == "__main__":
 
     recognizer = SignSeriesRecognition(4, 3)    
+    parser = argparse.ArgumentParser(prog='Video test for models')
+    parser.add_argument('-p', '--permuted', action='store_true')
+    parser.add_argument('-l', '--lite', action='store_true')
+    parser.add_argument('-m', '--model')
 
-    i1 = tf.lite.Interpreter(model_path='./lite/model1.tflite')
-    s1 = i1.get_signature_runner()
+    args = parser.parse_args()
 
-    i2 = tf.lite.Interpreter(model_path='./lite/model2.tflite')
-    s2 = i2.get_signature_runner()
+    if(args.model is None):
+        print('see -h')
+        exit()
 
-    i3 = tf.lite.Interpreter(model_path='./lite/model3.tflite')
-    s3 = i3.get_signature_runner()
+    MODEL_LITE = False
+    if(args.model.endswith('tflite')):
+        interpreter = tf.lite.Interpreter(model_path=f'models/{args.model}')
+        signature = interpreter.get_signature_runner()
+        MODEL_LITE = True
+    else:
+        model = tf.keras.saving.load_model(f"models/{args.model}")
 
-
-    superInterpreter = tf.lite.Interpreter(model_path='./lite/supermodel.tflite')
-    superSignature = superInterpreter.get_signature_runner()
+    SUPER = False
+    if(args.model.startswith('supermodel')):
+        if(args.lite):
+            interpreters = [tf.lite.Interpreter(model_path=f'models/model{i}.tflite') for i in range(1,4)]
+            signatures = [i.get_signature_runner() for i in interpreters]
+        else:
+            models = [tf.keras.saving.load_model(f"models/model{i}.keras") for i in range(1,4)]
+        SUPER = True
 
     language = [i + 1 for i in range(13)]
 
@@ -88,28 +102,35 @@ if __name__ == "__main__":
             for hand_landmarks in results.multi_hand_world_landmarks:
                 matrix = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark], dtype=np.float32)
          
-                p1 = s1(flatten_input=matrix)
-                p1 = p1[list(p1.keys())[0]]
-                p1[0] = np.exp(p1[0])/sum(np.exp(p1[0])) #softmax
-         
+                if(SUPER):
+                    res = []
+                    for m in range(3):
+                        if(args.permuted):
+                            key = np.load(f'keys/model{m+1}_key.npy')
+                            matrix = np.array(matrix.flatten()[key]).reshape(21,3)
+
+                        if(args.lite):
+                            atr = list(signatures[m].get_input_details().keys())[0]
+                            p = signatures[m](**{atr:np.array([matrix], dtype=np.float32)})
+                            p = p[list(p.keys())[0]]
+                        else:
+                            p = models[m].predict(matrix)
+
+                        res.append(p)
+                    matrix = np.array(np.concatenate(res))
+                elif(args.permuted):
+                    key = np.load(f'keys/{args.model.split(".")[0]}_key.npy')
+                    matrix = np.array(matrix.flatten()[key]).reshape(21,3)
             
-                p2 = s2(flatten_input=matrix)
-                p2 = p2[list(p2.keys())[0]]
-                p2[0] = np.exp(p2[0])/sum(np.exp(p2[0])) #softmax
-         
-         
-                p3 = s3(flatten_input=matrix)
-                p3 = p3[list(p3.keys())[0]]
-                p3[0] = np.exp(p3[0])/sum(np.exp(p3[0])) #softmax
+                if(MODEL_LITE):
+                    atr = list(signature.get_input_details().keys())[0]
+                    predictions = signature(**{atr:np.array([matrix], dtype=np.float32)})
+                    predictions = predictions[list(predictions.keys())[0]]
+                else:
+                    predictions = model.predict(np.array([matrix]))     
 
-                x = np.array([p1[0], p2[0], p3[0]], dtype=np.float32)
-
-                superP = superSignature(flatten_input=x)
-                superP = superP[list(superP.keys())[0]]
-                superP[0] = np.exp(superP[0])/sum(np.exp(superP[0])) #softmax
-
-                index = np.argmax(superP[0]) 
-                sureness = superP[0][predicted_sign_index]
+                index = np.argmax(predictions[0]) 
+                sureness = predictions[0][predicted_sign_index]
                     
                 if lastSign != predicted_sign_index:
                     lastSign = predicted_sign_index
