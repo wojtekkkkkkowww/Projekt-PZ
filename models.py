@@ -25,17 +25,24 @@ model1 = tf.keras.Sequential([
 ])
 
 model2 = tf.keras.Sequential([
-    tf.keras.layers.Flatten(input_shape=(21, 3)),
-    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.Conv1D(64, kernel_size=3, activation='relu', input_shape=(21, 3)),
+    tf.keras.layers.MaxPooling1D(pool_size=2),
+    tf.keras.layers.Conv1D(128, kernel_size=3, activation='relu'),
+    tf.keras.layers.MaxPooling1D(pool_size=2),
+    tf.keras.layers.GRU(64, return_sequences=True),
+    tf.keras.layers.GRU(128),
     tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dropout(0.4),
     tf.keras.layers.Dense(32, activation='relu'),
 ])
 
 model3 = tf.keras.Sequential([
-    tf.keras.layers.Flatten(input_shape=(21, 3)),
+    tf.keras.layers.Conv1D(64, kernel_size=3, activation='relu', input_shape=(21, 3)),
+    tf.keras.layers.MaxPooling1D(pool_size=2),
+    tf.keras.layers.Conv1D(128, kernel_size=3, activation='relu'),
+    tf.keras.layers.MaxPooling1D(pool_size=2),
+    tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dense(16, activation='relu'),
+    tf.keras.layers.Dense(32, activation='relu'),
 ])
 
 supermodel = tf.keras.Sequential([
