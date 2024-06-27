@@ -23,6 +23,7 @@ model1 = keras.Sequential([
     keras.layers.GRU(128, return_sequences=True),
     keras.layers.GRU(64),
     keras.layers.Dense(32, activation='relu'),
+    keras.layers.Dense(NUMBER_OF_SYMBOLS, activation='softmax')
 ])
 
 model2 = keras.Sequential([
@@ -30,6 +31,7 @@ model2 = keras.Sequential([
     keras.layers.LSTM(128, return_sequences=True),
     keras.layers.LSTM(64),
     keras.layers.Dense(32, activation='relu'),
+    keras.layers.Dense(NUMBER_OF_SYMBOLS, activation='softmax')
 ])
 
 model3 = keras.Sequential([
@@ -40,6 +42,7 @@ model3 = keras.Sequential([
     keras.layers.Flatten(),
     keras.layers.Dense(64, activation='relu'),
     keras.layers.Dense(32, activation='relu'),
+    keras.layers.Dense(NUMBER_OF_SYMBOLS, activation='softmax')
 ])
 
 supermodel = keras.Sequential([
@@ -47,6 +50,7 @@ supermodel = keras.Sequential([
     keras.layers.Dense(128, activation='relu'),
     keras.layers.Dense(64, activation='relu'),
     keras.layers.Dense(32, activation='relu'),
+    keras.layers.Dense(NUMBER_OF_SYMBOLS, activation='softmax')
 ])
 
 def gen_seq(sequence_length, X_train):
@@ -88,8 +92,6 @@ def get_model(model):
 
 def save_model(epoch, x_train, y_train):
     model = get_model(MODEL_NAME)
-    model.add(keras.layers.Dense(NUMBER_OF_SYMBOLS))
-    model.add(keras.layers.Softmax())
 
     model.compile(optimizer='adam',
              loss=keras.losses.SparseCategoricalCrossentropy(),
