@@ -3,7 +3,6 @@ import tensorflow as tf
 import argparse
 import os
 import time
-from ..models import get_dataset
 
 parser = argparse.ArgumentParser(prog='Test models')
 parser.add_argument('-p', '--permuted', action='store_true')
@@ -12,6 +11,33 @@ parser.add_argument('-s', '--sequential', action='store_true')
 parser.add_argument('-m', '--model')
 parser.add_argument('-d', '--data') # data/ASLtrain
 
+def gen_seq(sequence_length, X_train):
+    sequences = []
+    for i in range(0, len(X_train) - sequence_length + 1):
+        sequence = np.array(X_train[i:i + sequence_length]).reshape(sequence_length,21*3)
+        sequences.append(sequence)
+    return sequences
+
+def get_dataset(data_dir,sequential,permuted):
+    train = []
+    for i in range(NUMBER_OF_SYMBOLS):
+        loaded = np.load(os.path.join(data_dir, f'{i}.npy'))
+
+        if(permuted):
+            key = np.load(f'keys/{MODEL_NAME}_key.npy')
+            x_perm = np.array([np.array(x.flatten()[key]).reshape(21,3) for x in loaded])
+            loaded = x_perm
+
+        if(sequential):
+            loaded = gen_seq(10,loaded)
+
+        train.append(loaded)
+
+    x_train =  np.concatenate(train)
+    y_train = np.concatenate([np.full(len(sign), i) for i, sign in enumerate(train)])
+    
+    return x_train,y_train
+
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -19,8 +45,9 @@ if __name__ == "__main__":
         print("see -h")
         exit()
     
+    MODEL_NAME = args.model
     NUMBER_OF_SYMBOLS = len(os.listdir(f'{os.getcwd()}/{args.data}'))
-    x_test, y_test = get_dataset(args.data,args.sequential)
+    x_test, y_test = get_dataset(args.data,args.sequential,args.permuted)
 
     MODEL_LITE = False
     if(args.model.endswith('tflite')):
@@ -51,10 +78,6 @@ if __name__ == "__main__":
         if(SUPER):
             res = []
             for m in range(3):
-                if(args.permuted):
-                    key = np.load(f'keys/model{m+1}_key.npy')
-                    sample = np.array(sample.flatten()[key]).reshape(21,3)
-
                 if(args.lite):
                     atr = list(signatures[m].get_input_details().keys())[0]
                     print(sample.shape)
@@ -65,9 +88,6 @@ if __name__ == "__main__":
 
                 res.append(p)
             sample = np.array(np.concatenate(res))
-        elif(args.permuted):
-            key = np.load(f'keys/{args.model.split(".")[0]}_key.npy')
-            sample = np.array(sample.flatten()[key]).reshape(21,3)
 
         if(MODEL_LITE):
             atr = list(signature.get_input_details().keys())[0]

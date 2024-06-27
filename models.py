@@ -14,6 +14,7 @@ parser.add_argument('-p', '--permuted',action='store_true')
 
 args = parser.parse_args()
 NUMBER_OF_SYMBOLS = len(os.listdir(f'{os.getcwd()}/{args.data}'))
+MODEL_NAME = args.model
 
 
 model1 = tf.keras.Sequential([
@@ -56,12 +57,21 @@ def gen_seq(sequence_length, X_train):
         sequences.append(sequence)
     return sequences
 
-def get_dataset(data_dir,sequential):
+def get_dataset(data_dir,sequential,permuted):
     train = []
     for i in range(NUMBER_OF_SYMBOLS):
         loaded = np.load(os.path.join(data_dir, f'{i}.npy'))
+
+        if(permuted):
+            key = np.arange(21*3)
+            np.random.shuffle(key)
+            np.save(f'keys/{MODEL_NAME}_key.npy', key)
+            x_perm = np.array([np.array(x.flatten()[key]).reshape(21,3) for x in loaded])
+            loaded = x_perm
+
         if(sequential):
             loaded = gen_seq(10,loaded)
+
         train.append(loaded)
 
     x_train =  np.concatenate(train)
@@ -77,15 +87,8 @@ def get_model(model):
         'supermodel':supermodel
     }[model]
 
-def save_model(model_string, epoch, x_train, y_train, permuted):
-    if(permuted):
-        key = np.arange(21*3)
-        np.random.shuffle(key)
-        np.save(f'keys/{model_string}_key.npy', key)
-        x_perm = np.array([np.array(x.flatten()[key]).reshape(21,3) for x in x_train])
-        x_train = x_perm
-
-    model = get_model(model_string)
+def save_model(epoch, x_train, y_train):
+    model = get_model(MODEL_NAME)
     model.add(tf.keras.layers.Dense(NUMBER_OF_SYMBOLS))
     model.add(tf.keras.layers.Softmax())
 
@@ -95,13 +98,13 @@ def save_model(model_string, epoch, x_train, y_train, permuted):
 
     model.fit(x_train, y_train, epochs=int(epoch))
 
-    model.save(f'models/{model_string}.keras')
-    tf.saved_model.save(model, f'to_lite_data/{model_string}')
+    model.save(f'models/{MODEL_NAME}.keras')
+    tf.saved_model.save(model, f'to_lite_data/{MODEL_NAME}')
 
 if __name__ == "__main__":
     if None in [args.data, args.model, args.epoch]:
         print("see -h")
         exit()
     
-    x_train, y_train = get_dataset(args.data,args.sequential)
-    save_model(args.model, args.epoch, x_train, y_train, args.permuted)
+    x_train, y_train = get_dataset(args.data,args.sequential,args.permuted)
+    save_model(args.epoch, x_train, y_train)
