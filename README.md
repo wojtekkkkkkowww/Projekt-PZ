@@ -5,7 +5,7 @@ Program rozpoznający gesty.
 Aktualnie został wytrenowany na poniższych gestach:
 
 <p align="center">
-  <img src="./diagrams/alfabet.png"/>
+  <img src="./images/sheet.jpg"/>
 </p>
 
 ## Instalacja
