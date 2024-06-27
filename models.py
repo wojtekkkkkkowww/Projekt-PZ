@@ -3,13 +3,17 @@ import tensorflow as tf
 import os
 import argparse
 
-NUMBER_OF_SYMBOLS = None
+
 
 parser = argparse.ArgumentParser(prog='Model trainer')
 parser.add_argument('-d', '--data')
 parser.add_argument('-m', '--model')
 parser.add_argument('-e', '--epoch')
 parser.add_argument('-p', '--permuted',action='store_true') 
+
+args = parser.parse_args()
+NUMBER_OF_SYMBOLS = len(os.listdir(f'{os.getcwd()}/{args.data}'))
+
 
 model1 = tf.keras.Sequential([
     tf.keras.layers.Flatten(input_shape=(21, 3)),
@@ -35,7 +39,7 @@ model3 = tf.keras.Sequential([
 ])
 
 supermodel = tf.keras.Sequential([
-    tf.keras.layers.Flatten(input_shape=(3, 12)),
+    tf.keras.layers.Flatten(input_shape=(3, NUMBER_OF_SYMBOLS)),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dense(64, activation='relu'),
     tf.keras.layers.Dense(32, activation='relu'),
@@ -77,11 +81,9 @@ def save_model(model_string, epoch, x_train, y_train, permuted):
     tf.saved_model.save(model, f'to_lite_data/{model_string}')
 
 if __name__ == "__main__":
-    args = parser.parse_args()
     if None in [args.data, args.model, args.epoch]:
         print("see -h")
         exit()
     
-    NUMBER_OF_SYMBOLS = len(os.listdir(f'{os.getcwd()}/{args.data}'))
     x_train, y_train = get_train_dataset(args.data)
     save_model(args.model, args.epoch, x_train, y_train, args.permuted)

@@ -41,5 +41,5 @@ for label in labels:
         os.makedirs(f"data/ASLtest", exist_ok=True)
         np.save(f"data/ASLtest/{label_to_int[label]}.npy", test_data)
         for i, train_data_split in enumerate(train_data_splits):
-            os.makedirs(f"data/ASLtrain{i+1}", exist_ok=True)
-            np.save(f"data/ASLtrain{i+1}/{label_to_int[label]}.npy", train_data_split)
+            os.makedirs(f"data/model{i+1}/ASLtrain", exist_ok=True)
+            np.save(f"data/model{i+1}/ASLtrain/{label_to_int[label]}.npy", train_data_split)
