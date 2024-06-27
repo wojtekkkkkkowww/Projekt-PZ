@@ -3,20 +3,14 @@ import tensorflow as tf
 import argparse
 import os
 import time
+from ..models import get_dataset
 
 parser = argparse.ArgumentParser(prog='Test models')
 parser.add_argument('-p', '--permuted', action='store_true')
 parser.add_argument('-l', '--lite', action='store_true')
+parser.add_argument('-s', '--sequential', action='store_true')
 parser.add_argument('-m', '--model')
 parser.add_argument('-d', '--data') # data/ASLtrain
-
-def get_test_dataset(data_dir):
-    test = [np.load(os.path.join(data_dir, f'{i}.npy')) for i in range(NUMBER_OF_SYMBOLS)]
-    x_test =  np.concatenate(test) 
-    y_test = np.concatenate([np.full(len(sign), i) for i, sign in enumerate(test)])
-    print(x_test.shape)
-    print(y_test)
-    return x_test, y_test
 
 
 if __name__ == "__main__":
@@ -26,7 +20,7 @@ if __name__ == "__main__":
         exit()
     
     NUMBER_OF_SYMBOLS = len(os.listdir(f'{os.getcwd()}/{args.data}'))
-    x_test, y_test = get_test_dataset(args.data)
+    x_test, y_test = get_dataset(args.data,args.sequential)
 
     MODEL_LITE = False
     if(args.model.endswith('tflite')):
@@ -80,7 +74,7 @@ if __name__ == "__main__":
             predictions = signature(**{atr:np.array([sample], dtype=np.float32)})
             predictions = predictions[list(predictions.keys())[0]]
         else:
-            predictions = model.predict(np.array([sample]))
+            predictions = model.predict(np.array([sample]),verbose='false')
 
         predicted_sign_index = np.argmax(predictions[0])
         sureness = predictions[0][predicted_sign_index]
@@ -91,6 +85,7 @@ if __name__ == "__main__":
         if predicted_sign_index == y_test[i]:
             correct_predictions += 1
         accuracy = correct_predictions / (i + 1)
+        print(f"{i}/{len(x_test)} || acc : {accuracy}")
         accuracies.append(accuracy)
 
 

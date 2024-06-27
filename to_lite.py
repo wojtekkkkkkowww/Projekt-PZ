@@ -6,6 +6,7 @@ import sys
 PATH = f'to_lite_data/{sys.argv[1]}'
 
 converter = tf.lite.TFLiteConverter.from_saved_model(PATH)
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
 converter.target_spec.supported_ops = [
   tf.lite.OpsSet.TFLITE_BUILTINS, # enable TensorFlow Lite ops.
   tf.lite.OpsSet.SELECT_TF_OPS # enable TensorFlow ops.

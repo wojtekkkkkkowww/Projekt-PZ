@@ -7,6 +7,7 @@ import argparse
 
 parser = argparse.ArgumentParser(prog='Model trainer')
 parser.add_argument('-d', '--data')
+parser.add_argument('-s', '--sequential', action='store_true')
 parser.add_argument('-m', '--model')
 parser.add_argument('-e', '--epoch')
 parser.add_argument('-p', '--permuted',action='store_true') 
@@ -25,13 +26,9 @@ model1 = tf.keras.Sequential([
 ])
 
 model2 = tf.keras.Sequential([
-    tf.keras.layers.Conv1D(64, kernel_size=3, activation='relu', input_shape=(21, 3)),
-    tf.keras.layers.MaxPooling1D(pool_size=2),
-    tf.keras.layers.Conv1D(128, kernel_size=3, activation='relu'),
-    tf.keras.layers.MaxPooling1D(pool_size=2),
-    tf.keras.layers.GRU(64, return_sequences=True),
-    tf.keras.layers.GRU(128),
-    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.InputLayer(input_shape=(10, 21*3)),
+    tf.keras.layers.LSTM(128, return_sequences=True),
+    tf.keras.layers.LSTM(64),
     tf.keras.layers.Dense(32, activation='relu'),
 ])
 
@@ -52,11 +49,24 @@ supermodel = tf.keras.Sequential([
     tf.keras.layers.Dense(32, activation='relu'),
 ])
 
-def get_train_dataset(data_dir):
-    train = [np.load(os.path.join(data_dir, f'{i}.npy')) for i in range(NUMBER_OF_SYMBOLS)]
-    x_train =  np.concatenate(train) 
+def gen_seq(sequence_length, X_train):
+    sequences = []
+    for i in range(0, len(X_train) - sequence_length + 1):
+        sequence = np.array(X_train[i:i + sequence_length]).reshape(sequence_length,21*3)
+        sequences.append(sequence)
+    return sequences
+
+def get_dataset(data_dir,sequential):
+    train = []
+    for i in range(NUMBER_OF_SYMBOLS):
+        loaded = np.load(os.path.join(data_dir, f'{i}.npy'))
+        if(sequential):
+            loaded = gen_seq(10,loaded)
+        train.append(loaded)
+
+    x_train =  np.concatenate(train)
     y_train = np.concatenate([np.full(len(sign), i) for i, sign in enumerate(train)])
-    print(x_train.shape)
+    
     return x_train,y_train
 
 def get_model(model):
@@ -84,6 +94,7 @@ def save_model(model_string, epoch, x_train, y_train, permuted):
              metrics=['accuracy'])
 
     model.fit(x_train, y_train, epochs=int(epoch))
+
     model.save(f'models/{model_string}.keras')
     tf.saved_model.save(model, f'to_lite_data/{model_string}')
 
@@ -92,5 +103,5 @@ if __name__ == "__main__":
         print("see -h")
         exit()
     
-    x_train, y_train = get_train_dataset(args.data)
+    x_train, y_train = get_dataset(args.data,args.sequential)
     save_model(args.model, args.epoch, x_train, y_train, args.permuted)
