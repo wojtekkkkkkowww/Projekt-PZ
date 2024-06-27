@@ -3,4 +3,4 @@ numpy==1.24.1
 opencv_contrib_python==4.8.1.78
 opencv_python==4.8.1.78
 tensorflow==2.14.0
-tensorflow_intel==2.14.0
+#tensorflow_intel==2.14.0

@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import os
 import argparse
+import keras
 
 
 
@@ -17,37 +18,35 @@ NUMBER_OF_SYMBOLS = len(os.listdir(f'{os.getcwd()}/{args.data}'))
 MODEL_NAME = args.model
 
 
-model1 = tf.keras.Sequential([
-    tf.keras.layers.Flatten(input_shape=(21, 3)),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dropout(0.5),  
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dropout(0.5),  
-    tf.keras.layers.Dense(32, activation='relu'),
+model1 = keras.Sequential([
+    keras.layers.InputLayer(input_shape=(10, 21*3)),
+    keras.layers.GRU(128, return_sequences=True),
+    keras.layers.GRU(64),
+    keras.layers.Dense(32, activation='relu'),
 ])
 
-model2 = tf.keras.Sequential([
-    tf.keras.layers.InputLayer(input_shape=(10, 21*3)),
-    tf.keras.layers.LSTM(128, return_sequences=True),
-    tf.keras.layers.LSTM(64),
-    tf.keras.layers.Dense(32, activation='relu'),
+model2 = keras.Sequential([
+    keras.layers.InputLayer(input_shape=(10, 21*3)),
+    keras.layers.LSTM(128, return_sequences=True),
+    keras.layers.LSTM(64),
+    keras.layers.Dense(32, activation='relu'),
 ])
 
-model3 = tf.keras.Sequential([
-    tf.keras.layers.Conv1D(64, kernel_size=3, activation='relu', input_shape=(21, 3)),
-    tf.keras.layers.MaxPooling1D(pool_size=2),
-    tf.keras.layers.Conv1D(128, kernel_size=3, activation='relu'),
-    tf.keras.layers.MaxPooling1D(pool_size=2),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dense(32, activation='relu'),
+model3 = keras.Sequential([
+    keras.layers.Conv1D(64, kernel_size=3, activation='relu', input_shape=(21, 3)),
+    keras.layers.MaxPooling1D(pool_size=2),
+    keras.layers.Conv1D(128, kernel_size=3, activation='relu'),
+    keras.layers.MaxPooling1D(pool_size=2),
+    keras.layers.Flatten(),
+    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(32, activation='relu'),
 ])
 
-supermodel = tf.keras.Sequential([
-    tf.keras.layers.Flatten(input_shape=(3, NUMBER_OF_SYMBOLS)),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dense(32, activation='relu'),
+supermodel = keras.Sequential([
+    keras.layers.Flatten(input_shape=(3, NUMBER_OF_SYMBOLS)),
+    keras.layers.Dense(128, activation='relu'),
+    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(32, activation='relu'),
 ])
 
 def gen_seq(sequence_length, X_train):
@@ -89,17 +88,17 @@ def get_model(model):
 
 def save_model(epoch, x_train, y_train):
     model = get_model(MODEL_NAME)
-    model.add(tf.keras.layers.Dense(NUMBER_OF_SYMBOLS))
-    model.add(tf.keras.layers.Softmax())
+    model.add(keras.layers.Dense(NUMBER_OF_SYMBOLS))
+    model.add(keras.layers.Softmax())
 
     model.compile(optimizer='adam',
-             loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+             loss=keras.losses.SparseCategoricalCrossentropy(),
              metrics=['accuracy'])
 
     model.fit(x_train, y_train, epochs=int(epoch))
 
     model.save(f'models/{MODEL_NAME}.keras')
-    tf.saved_model.save(model, f'to_lite_data/{MODEL_NAME}')
+    model.export(f'to_lite_data/{MODEL_NAME}')
 
 if __name__ == "__main__":
     if None in [args.data, args.model, args.epoch]:

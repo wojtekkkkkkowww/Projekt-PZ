@@ -24,7 +24,7 @@ def get_dataset(data_dir,sequential,permuted):
         loaded = np.load(os.path.join(data_dir, f'{i}.npy'))
 
         if(permuted):
-            key = np.load(f'keys/{MODEL_NAME}_key.npy')
+            key = np.load(f'keys/{MODEL_NAME.split(".")[0]}_key.npy')
             x_perm = np.array([np.array(x.flatten()[key]).reshape(21,3) for x in loaded])
             loaded = x_perm
 
