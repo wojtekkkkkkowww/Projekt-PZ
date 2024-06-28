@@ -74,10 +74,10 @@ while cap.isOpened():
             if(SUPER):
                 res = []
                 for subm in submodels:
-                    res.append( subm.predict(sample) )
-                sample = np.array(np.concatenate(res))
+                    res.append( subm.predict(matrix) )
+                matrix = np.array(np.concatenate(res))
 
-            predictions = model.predict(sample)
+            predictions = model.predict(matrix)
 
             predicted_sign_index = np.argmax(predictions[0])
             sureness = predictions[0][predicted_sign_index]
