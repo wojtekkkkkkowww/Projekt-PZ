@@ -3,8 +3,8 @@ import pandas as pd
 from tabulate import tabulate
 
 models = ['model1', 'model2', 'model3', 'model1_lite', 'model2_lite', 'model3_lite', 'supermodel_lite', 
-          'model1_lite_permuted', 'model2_lite_permuted', 'model3_lite_permuted', 'supermodel_lite_permuted']
-short_names = ['m1', 'm2', 'm3', 'm1L', 'm2L', 'm3L', 'supermodelL', 'm1LP', 'm2LP', 'm3LP', 'supermodelLP']
+          'model1_lite_permuted', 'model2_lite_permuted', 'model3_lite_permuted']
+short_names = ['m1', 'm2', 'm3', 'm1L', 'm2L', 'm3L', 'supermodelL', 'm1LP', 'm2LP', 'm3LP']
 
 name_dict = dict(zip(models, short_names))
 

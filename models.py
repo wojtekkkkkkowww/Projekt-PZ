@@ -35,7 +35,7 @@ class GestureRecognizerModel():
             self.model = keras.saving.load_model(f"models/{self.name}.keras")
 
     def predict(self, sign):
-        if(self.key):
+        if(self.key is not None):
             sign = np.array(sign.flatten()[self.key]).reshape(21,3)
 
         if(self.seq_data):
@@ -47,7 +47,7 @@ class GestureRecognizerModel():
             p = self.signature(**{atr:np.array([sign], dtype=np.float32)})
             return p[list(p.keys())[0]]
         else:
-            return self.model.predict([sign])
+            return self.model.predict(np.array([sign]), verbose=False)
 
 
     def train_save(self, epoch, x_train, y_train):
@@ -69,20 +69,22 @@ def gen_seq(X_train):
     return sequences
 
 def get_dataset(data_dir,sequential,permuted):
+    
+    if(permuted):
+        key = np.arange(21*3)
+        np.random.shuffle(key)
+        np.save(f'keys/{MODEL_NAME}_key.npy', key)
+
     train = []
     for i in range(NUMBER_OF_SYMBOLS):
         loaded = np.load(os.path.join(data_dir, f'{i}.npy'))
 
         if(permuted):
-            key = np.arange(21*3)
-            np.random.shuffle(key)
-            np.save(f'keys/{MODEL_NAME}_key.npy', key)
-            x_perm = np.array([np.array(x.flatten()[key]).reshape(21,3) for x in loaded])
+            x_perm = np.array([x.flatten()[key].reshape(21,3) for x in loaded])
             loaded = x_perm
 
         if(sequential):
             loaded = gen_seq(loaded)
-
         train.append(loaded)
 
     x_train =  np.concatenate(train)
