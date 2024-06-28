@@ -11,6 +11,8 @@ parser.add_argument('-s', '--sequential', action='store_true')
 parser.add_argument('-m', '--model')
 parser.add_argument('-d', '--data') # data/ASLtrain
 
+SEQ_LEN = 10
+
 def gen_seq(sequence_length, X_train):
     sequences = []
     for i in range(0, len(X_train) - sequence_length + 1):
@@ -29,7 +31,7 @@ def get_dataset(data_dir,sequential,permuted):
             loaded = x_perm
 
         if(sequential):
-            loaded = gen_seq(10,loaded)
+            loaded = gen_seq(SEQ_LEN,loaded)
 
         train.append(loaded)
 

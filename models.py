@@ -16,10 +16,11 @@ parser.add_argument('-p', '--permuted',action='store_true')
 args = parser.parse_args()
 NUMBER_OF_SYMBOLS = len(os.listdir(f'{os.getcwd()}/{args.data}'))
 MODEL_NAME = args.model
+SEQ_LEN = 10
 
 
 model1 = keras.Sequential([
-    keras.layers.InputLayer(input_shape=(10, 21*3)),
+    keras.layers.InputLayer(input_shape=(SEQ_LEN, 21*3)),
     keras.layers.GRU(128, return_sequences=True),
     keras.layers.GRU(64),
     keras.layers.Dense(32, activation='relu'),
@@ -27,7 +28,7 @@ model1 = keras.Sequential([
 ])
 
 model2 = keras.Sequential([
-    keras.layers.InputLayer(input_shape=(10, 21*3)),
+    keras.layers.InputLayer(input_shape=(SEQ_LEN, 21*3)),
     keras.layers.LSTM(128, return_sequences=True),
     keras.layers.LSTM(64),
     keras.layers.Dense(32, activation='relu'),
@@ -35,11 +36,7 @@ model2 = keras.Sequential([
 ])
 
 model3 = keras.Sequential([
-    keras.layers.Conv1D(64, kernel_size=3, activation='relu', input_shape=(21, 3)),
-    keras.layers.MaxPooling1D(pool_size=2),
-    keras.layers.Conv1D(128, kernel_size=3, activation='relu'),
-    keras.layers.MaxPooling1D(pool_size=2),
-    keras.layers.Flatten(),
+    keras.layers.Flatten(input_shape=(21,3)),
     keras.layers.Dense(64, activation='relu'),
     keras.layers.Dense(32, activation='relu'),
     keras.layers.Dense(NUMBER_OF_SYMBOLS, activation='softmax')
@@ -53,10 +50,10 @@ supermodel = keras.Sequential([
     keras.layers.Dense(NUMBER_OF_SYMBOLS, activation='softmax')
 ])
 
-def gen_seq(sequence_length, X_train):
+def gen_seq(X_train):
     sequences = []
-    for i in range(0, len(X_train) - sequence_length + 1):
-        sequence = np.array(X_train[i:i + sequence_length]).reshape(sequence_length,21*3)
+    for i in range(0, len(X_train) - SEQ_LEN + 1):
+        sequence = np.array(X_train[i:i + SEQ_LEN]).reshape(SEQ_LEN,21*3)
         sequences.append(sequence)
     return sequences
 
@@ -73,7 +70,7 @@ def get_dataset(data_dir,sequential,permuted):
             loaded = x_perm
 
         if(sequential):
-            loaded = gen_seq(10,loaded)
+            loaded = gen_seq(loaded)
 
         train.append(loaded)
 

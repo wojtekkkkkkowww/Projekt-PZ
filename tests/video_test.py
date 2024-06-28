@@ -4,11 +4,13 @@ import cv2
 import mediapipe as mp
 import time
 import argparse
+from collections import deque
 
 parser = argparse.ArgumentParser(prog='Video test for models')
 parser.add_argument('-p', '--permuted', action='store_true')
 parser.add_argument('-l', '--lite', action='store_true')
 parser.add_argument('-m', '--model')
+parser.add_argument('-s', '--sequential', action='store_true')
 
 args = parser.parse_args()
 
@@ -34,7 +36,7 @@ if(args.model.startswith('supermodel')):
     SUPER = True
 
 
-language = [i + 1 for i in range(13)]
+language = [i + 1 for i in range(28)]
 
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(model_complexity=0,
@@ -44,7 +46,9 @@ hands = mp_hands.Hands(model_complexity=0,
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 
+SEQ_LEN = 10
 cap = cv2.VideoCapture(0)
+seq_data = deque([np.zeros((21*3)) for _ in range(SEQ_LEN)], maxlen=SEQ_LEN)
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -92,13 +96,17 @@ while cap.isOpened():
             elif(args.permuted):
                 key = np.load(f'keys/{args.model.split(".")[0]}_key.npy')
                 matrix = np.array(matrix.flatten()[key]).reshape(21,3)
+
+            if(args.sequential):
+                seq_data.appendleft(matrix.flatten())
+                matrix = np.array(seq_data)
             
             if(MODEL_LITE):
                 atr = list(signature.get_input_details().keys())[0]
                 predictions = signature(**{atr:np.array([matrix], dtype=np.float32)})
                 predictions = predictions[list(predictions.keys())[0]]
             else:
-                predictions = model.predict(np.array([matrix]))
+                predictions = model.predict(np.array(matrix))
 
 
             predicted_sign_index = np.argmax(predictions[0])
