@@ -1,0 +1,5 @@
+1. Pobieramy obraz z kamery
+2. Obraz z kamery wrzucamy do Mediapipe który zwraca nam handmarki 
+3. Handmarki są permutowane według kluczy pi, sigma i tau, a następnie wrzucane do odpowiednich podmodeli
+4. Output subpodeli przekazywany jest jako jeden input to ensemble modelu, który zwraca predykcje gestu
+5. System mając podany gest decyduje co należy zrobić widząc dany gest

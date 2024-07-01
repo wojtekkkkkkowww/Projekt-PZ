@@ -1,0 +1,5 @@
+1. Mamy dane do treningu, które są handmarkami
+2. Dane permutujemy według kluczy pi, sigma i tau, przez co otrzymujemy dane, które są niezrozumiałe/bezużyteczne dla osoby nie znającej kluczy (są bezpieczne)
+3. Dane takie, możemy bez obawy wysłać na dowolne serwery nie obawiając się, że zostaną nam ukradzione, wsytzyknięte zostaną nie chciane dane
+4. Na sewerach zostały wytrenowane modele X, Y, Z
+5. Submodele zostały połączone w 1 model
