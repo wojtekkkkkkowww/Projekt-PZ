@@ -2,4 +2,4 @@ Tabelka legenda:
 m1, m2, m3 - podstawowe modele (nie lite, bez permutacji)
 m1L, m2L, m3L - modele lite bez permutacji 
 supermodeL - supermodel lite bez permutacji 
-m1LP, m2LP, m3LP - super model lite z permutacjami
+m1LP, m2LP, m3LP - modele lite z permutacjami
